@@ -6,6 +6,7 @@
 #include <string.h>
 #include "readcmd.h"
 #include "execcmd.h"
+#include "csapp.h"
 
 
 void execute_command(struct cmdline *cmd)
@@ -29,10 +30,30 @@ void execute_command(struct cmdline *cmd)
 		if (pid < 0) {
 			perror("fork");
 		} else if (pid == 0) {
-			if (execvp(args[0], args) == -1) {
-				perror("execvp");
-				exit(1);
+			if (cmd->in) {
+				int fd = Open(cmd->in, O_RDONLY, 00400);
+				if (fd == -1) {
+					perror("open");
+			} else {
+				Dup2(fd, 0);
+				Close(fd);
 			}
+		}
+		if (cmd->out) {
+			int fd = Open(cmd->out, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+			if (fd == -1) {
+				perror("open");
+			} else {
+				Dup2(fd, 1);
+				Close(fd);
+			}
+		
+		}
+		if (execvp(args[0], args) == -1) {
+			perror("execvp");
+			exit(1);
+		}
+
 		} else {
 			wait(NULL);
 		}
