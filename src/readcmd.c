@@ -9,7 +9,7 @@
 #include <limits.h>
 #include <string.h>
 #include "readcmd.h"
-
+#include "execcmd.h"
 
 static void memory_error(void)
 {
@@ -33,7 +33,6 @@ static void *xrealloc(void *ptr, size_t size)
 	if (!p) memory_error();
 	return p;
 }
-
 
 /* Read a line from standard input and put it in a char[] */
 static char *readline(void)
@@ -149,37 +148,6 @@ static void freecmd(struct cmdline *s)
 	if (s->seq) freeseq(s->seq);
 }
 
-/* Function to execute basic commands */
-static void execute_command(struct cmdline *cmd)
-{
-	if (!cmd || !cmd->seq || !cmd->seq[0]) return; 
-
-	char **args = cmd->seq[0];
-
-	if (strcmp(args[0], "quit") == 0) {
-		exit(0);
-	} else if (strcmp(args[0], "cd") == 0) {
-		if (args[1]) {
-			if (chdir(args[1]) < 0) {
-				perror("cd");
-			}
-		} else {
-			fprintf(stderr, "cd: argument manquant\n");
-		}
-	} else {
-		pid_t pid = fork();
-		if (pid < 0) {
-			perror("fork");
-		} else if (pid == 0) {
-			execvp(args[0], args);
-			perror("execvp");
-			exit(1);
-		} else {
-			wait(NULL);
-		}
-	}
-}
-
 struct cmdline *readcmd(void)
 {
 	static struct cmdline *static_cmdline = 0;
@@ -282,7 +250,6 @@ struct cmdline *readcmd(void)
 	free(words);
 	s->seq = seq;
 
-	execute_command(s);
 	return s;
 error:
 	while ((w = words[i++]) != 0) {

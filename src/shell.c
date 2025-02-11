@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "readcmd.h"
+#include "execcmd.h"
 #include "csapp.h"
 
 
@@ -28,6 +29,8 @@ int main()
 			printf("error: %s\n", l->err);
 			continue;
 		}
+
+		execute_command(l);
 
 		if (l->in) printf("in: %s\n", l->in);
 		if (l->out) printf("out: %s\n", l->out);
