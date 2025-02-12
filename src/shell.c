@@ -13,7 +13,7 @@ int main()
 {
 	while (1) {
 		struct cmdline *l;
-		int i, j;
+		// int i, j;
 
 		/* Analysis */
 		printf("fclsh> ");

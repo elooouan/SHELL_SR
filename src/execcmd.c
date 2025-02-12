@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <limits.h>
-#include <string.h>
-#include "readcmd.h"
 #include "execcmd.h"
-#include "csapp.h"
 
 /* Function to assign a code to a given command */
 int command_to_code(char* cmd) {
