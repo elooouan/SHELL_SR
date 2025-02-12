@@ -3,9 +3,11 @@
 /* Function to assign a code to a given command */
 int command_to_code(char* cmd) {
 	int res;
+
 	if (strcmp(cmd, "quit") == 0) res = 1;
 	else if (strcmp(cmd, "cd") == 0) res = 2;
 	else res = 0;
+
 	return res;
 }
 
@@ -46,6 +48,7 @@ void external_command(struct cmdline *cmd, int i){
 /* Function to handle input redirections for a command  */
 void input_redirection(char* in) {
 	int fd = open(in, O_RDONLY);
+
 	if (fd == -1) {
 		perror(in);
 		return;
@@ -58,6 +61,7 @@ void input_redirection(char* in) {
 /* Function to handle output redirections for a command  */
 void output_redirection(char* out) {
 	int fd = Open(out, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	
 	if (fd == -1) {
 		perror("open");
 		return;
@@ -127,7 +131,6 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds)
 		Wait(NULL);
 	}
 }
-
 
 /* Function to handle piping -> multiple commands */
 void sequence_handler(struct cmdline* cmd)

@@ -31,7 +31,8 @@ int main()
 			continue;
 		}
 
-		// if (!l->seq[0]) continue; 
+		/* If "quit" command then terminate shell */
+		if (command_to_code(l->seq[0][0])) execute_command(l, 0);
 
 		/* Execution  */
 		sequence_handler(l);

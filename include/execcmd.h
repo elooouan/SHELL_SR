@@ -1,7 +1,8 @@
 /* 
  *        Created by : Elie HATOUM and Elouan DURANTON-MAMADOU 
- * 
- * execcmd.h - prototypes and definitions for the fcl - command exec
+ */
+/*   
+ * execcmd.h - prototypes and definitions for the fcl - command exec 
  */
 /* $begin execcmd.h */
 #ifndef __EXECCMD_H
