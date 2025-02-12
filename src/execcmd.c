@@ -18,8 +18,8 @@ int command_to_code(char* cmd) {
 }
 
 /* Function to handle built in commands */
-void built_in_command(struct cmdline *cmd) {
-	char **args = cmd->seq[0];
+void built_in_command(struct cmdline *cmd, int i) {
+	char **args = cmd->seq[i];
 	int code = command_to_code(args[0]);
 
 	switch (code) {
@@ -38,25 +38,17 @@ void built_in_command(struct cmdline *cmd) {
 	}
 }
 
-void external_command(struct cmdline *cmd){
-	char **args = cmd->seq[0];
-	pid_t pid = fork();
+/* Function to handle external commands */
+void external_command(struct cmdline *cmd, int i){
+	char **args = cmd->seq[i];
 
-	if (pid < 0) {
-		perror("fork");
-
-	} else if (pid == 0) {
-		if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
-		if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
-
-		if (execvp(args[0], args) == -1) {
-			printf("%s: command not found\n", args[0]);
-			exit(1);
-		}
-	} else {
-		wait(NULL);
-	}
+	if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
+	if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
 	
+	if (execvp(args[0], args) == -1) {
+		printf("%s: command not found\n", args[0]);
+		exit(1);
+	}	
 }
 
 /* Function to handle input redirections for a command  */
@@ -83,11 +75,84 @@ void output_redirection(char* out) {
 	}
 }
 
-void execute_command(struct cmdline *cmd)
+/* Our main function to run commands */
+void execute_command(struct cmdline *cmd, int i)
 {
-	char** words = cmd->seq[0];
-	if (!words) return; 
+	char** words = cmd->seq[i];
 	
-	if (command_to_code(words[0]) > 0) built_in_command(cmd);
-	else external_command(cmd);
+	if (command_to_code(words[0]) > 0) built_in_command(cmd, i);
+	else external_command(cmd, i);
+}
+
+/* Function to count number of commands in seq */
+int count_commands(struct cmdline* cmd)
+{
+	int number_cmds = 0;
+	while (cmd->seq[number_cmds]) number_cmds++;
+	return number_cmds;
+}
+
+/* Function to create n pipes */
+void create_pipes(int pipes[][2], int number_cmds) {
+	for (int i = 0; i < number_cmds - 1; i++) { //  we need (number_cmds - 1) pipes
+		if (pipe(pipes[i]) == -1) {
+			perror("pipes");
+			return;
+		}
+	}
+}
+
+/* Function to handle and connect multiple pipes i.e. a pipeline */
+void pipeline_handler(struct cmdline* cmd, int number_cmds)
+{
+	int pipes[number_cmds - 1][2]; // Array of n pipes -> ... | ... | ... 
+
+	create_pipes(pipes, number_cmds);
+
+	for (int i = 0; i < number_cmds; i++) {
+		pid_t pid = Fork();
+
+		/* Child */
+		if (pid == 0) {
+			if (i > 0) Dup2(pipes[i-1][0], 0); //  If it's not the first command -> read from the pipeline
+			if (i < number_cmds - 1) Dup2(pipes[i][1], 1); // If it's not the last command -> write into the pipeline
+
+			for (int j = 0; j < number_cmds - 1; j++) {
+				Close(pipes[j][0]);
+				Close(pipes[j][1]);
+			}
+
+			execute_command(cmd, i);
+		}
+	}
+
+	for (int j = 0; j < number_cmds - 1; j++) {
+		Close(pipes[j][0]);
+		Close(pipes[j][1]);
+	}
+
+	for (int i = 0; i < number_cmds; i++) {
+		Wait(NULL);
+	}
+}
+
+
+/* Function to handle piping -> multiple commands */
+void sequence_handler(struct cmdline* cmd)
+{
+	int number_cmds = count_commands(cmd);
+	
+	/* If there are no pipes (single command) */
+	if (!number_cmds) return;
+	else if(number_cmds > 1) {
+		pipeline_handler(cmd, number_cmds);
+	} else {
+		pid_t pid = Fork();
+
+		if (pid == 0) {
+			execute_command(cmd, 0);
+		} else {
+			Wait(NULL);
+		}
+	}
 }

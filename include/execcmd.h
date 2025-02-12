@@ -6,6 +6,6 @@
 #define __EXECCMD_H
 
 /* Execute simple commands */
-void execute_command(struct cmdline *cmd);
+void execute_command(struct cmdline *cmd, int i);
 
 #endif

@@ -15,6 +15,7 @@ int main()
 		struct cmdline *l;
 		int i, j;
 
+		/* Analysis */
 		printf("fclsh> ");
 		l = readcmd();
 
@@ -30,10 +31,13 @@ int main()
 			continue;
 		}
 
-		execute_command(l);
+		// if (!l->seq[0]) continue; 
 
-		if (l->in) printf("in: %s\n", l->in);
-		if (l->out) printf("out: %s\n", l->out);
+		/* Execution  */
+		sequence_handler(l);
+
+		// if (l->in) printf("in: %s\n", l->in);
+		// if (l->out) printf("out: %s\n", l->out);
 
 		/* Display each command of the pipe */
 		// for (i=0; l->seq[i]!=0; i++) {
