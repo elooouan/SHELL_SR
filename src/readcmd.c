@@ -237,6 +237,10 @@ struct cmdline *readcmd(void)
 		}
 	}
 
+	/* Adding & parsing for background handling */
+	/* gedit & cat res.txt -> opens gedit and then runs cat res.txt -> need to think about this */
+
+
 	if (cmd_len != 0) {
 		seq = xrealloc(seq, (seq_len + 2) * sizeof(char **));
 		seq[seq_len++] = cmd;
