@@ -22,7 +22,7 @@ void built_in_command(struct cmdline *cmd, int i) {
 			break;
 		case 2:
 			if (args[1]) {
-				if (chdir(args[1]) < 0) {
+				if (chdir(args[1]) == -1) {
 					perror("cd");
 				}
 			} else {
@@ -84,7 +84,7 @@ void execute_command(struct cmdline *cmd, int i)
 int count_commands(struct cmdline* cmd)
 {
 	int number_cmds = 0;
-	
+
 	while (cmd->seq[number_cmds]) number_cmds++;
 
 	return number_cmds;

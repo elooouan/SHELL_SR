@@ -8,7 +8,6 @@
 #include "execcmd.h"
 #include "csapp.h"
 
-
 int main()
 {
 	while (1) {
@@ -31,8 +30,8 @@ int main()
 			continue;
 		}
 
-		/* If "quit" command then terminate shell */
-		if (l->seq[0] && command_to_code(l->seq[0][0])) execute_command(l, 0);
+		/* If command is "quit" then terminate shell */
+		if (l->seq[0] && command_to_code(l->seq[0][0]) == 1) execute_command(l, 0); /* WARNING: cannot use "quit" inside of a pipe -> if you want to do so add "quit" inside of execcmd and use kill(ppid (shell pid), SIGKILL)*/
 
 		/* Execution  */
 		sequence_handler(l);
