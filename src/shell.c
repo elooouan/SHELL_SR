@@ -31,7 +31,9 @@ int main()
 		}
 
 		/* If command is "quit" then terminate shell */
-		if (l->seq[0] && command_to_code(l->seq[0][0]) == 1) execute_command(l, 0); /* WARNING: cannot use "quit" inside of a pipe -> if you want to do so add "quit" inside of execcmd and use kill(ppid (shell pid), SIGKILL)*/
+		if (l->seq[0] && command_to_code(l->seq[0][0]) == 1) execute_command(l, 0, l->background); /* WARNING: cannot use "quit" inside of a pipe -> if you want to do so add "quit" inside of execcmd and use kill(ppid (shell pid), SIGKILL)*/
+
+		// more bugs are -> gedit & and then gedit, cd tests & then multiple quits
 
 		/* Execution  */
 		sequence_handler(l);

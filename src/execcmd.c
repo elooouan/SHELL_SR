@@ -21,6 +21,7 @@ void built_in_command(struct cmdline *cmd, int i) {
 			exit(0);
 			break;
 		case 2:
+			if (!args[1] && cmd->background) printf("[job nb] : %d\n", getpid());
 			if (args[1]) {
 				if (chdir(args[1]) == -1) {
 					perror("cd");
@@ -39,10 +40,12 @@ void external_command(struct cmdline *cmd, int i){
 	if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
 	if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
 	
+
 	if (execvp(args[0], args) == -1) {
 		printf("%s: command not found\n", args[0]);
 		exit(1);
 	}	
+	if (cmd->background) printf("[job nb] : %d\n", getpid());
 }
 
 /* Function to handle input redirections for a command  */
@@ -72,12 +75,13 @@ void output_redirection(char* out) {
 }
 
 /* Our main function to run commands */
-void execute_command(struct cmdline *cmd, int i)
+void execute_command(struct cmdline *cmd, int i, int background)
 {
 	char** words = cmd->seq[i];
 	
 	if (command_to_code(words[0]) > 0) built_in_command(cmd, i);
 	else external_command(cmd, i);
+
 }
 
 /* Function to count number of commands in seq */
@@ -110,16 +114,18 @@ void close_pipes(int pipes[][2], int number_cmds)
 	}
 }
 
-/* Function to wait for all child processes to die */
-void wait_all(int number_cmds)
+/* Function to wait for all child processes if in foreground*/
+void wait_all(int number_cmds, int background)
 {
-	for (int i = 0; i < number_cmds; i++) {
-		Wait(NULL);
+	if (!background) {		
+		for (int i = 0; i < number_cmds; i++) {
+			Wait(NULL);
+		}
 	}
 }
 
 /* Function to handle and connect multiple pipes i.e. a pipeline */
-void pipeline_handler(struct cmdline* cmd, int number_cmds)
+void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 {
 	int pipes[number_cmds - 1][2]; // Array of n pipes -> ... | ... | ... 
 
@@ -137,30 +143,32 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds)
 			if (i < number_cmds - 1) Dup2(pipes[i][1], 1);
 
 			close_pipes(pipes, number_cmds);
-			execute_command(cmd, i);
+			execute_command(cmd, i, background);
 		}
 	}
 
 	close_pipes(pipes, number_cmds);
-	wait_all(number_cmds);
+	wait_all(number_cmds, background);
 }
 
 /* Function to handle piping -> multiple commands */
 void sequence_handler(struct cmdline* cmd)
 {
 	int number_cmds = count_commands(cmd);
-
+	int background = cmd->background;
+	// printf("The process is in %s\n", background ? "Background" : "Foreground"); // -> remove just for debugging
 	/* No command (Enter) */
 	if (!number_cmds) return;
 	else if(number_cmds == 1) { /* Single command */
 		pid_t pid = Fork();
 
 		if (pid == 0) {
-			execute_command(cmd, 0);
+			execute_command(cmd, 0, background);
 		} else {
-			Wait(NULL);
+			if (!background) Wait(NULL);
 		}
 	} else { /* Pipes */
-		pipeline_handler(cmd, number_cmds);
+		pipeline_handler(cmd, number_cmds, background);
 	}
 }
+

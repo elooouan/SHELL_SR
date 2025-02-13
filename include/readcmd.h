@@ -16,6 +16,7 @@ struct cmdline {
 			   displayed. The other fields are null. */
 	char *in;	/* If not null : name of file for input redirection. */
 	char *out;	/* If not null : name of file for output redirection. */
+	int background; /* If 0 : Foreground, 1 : Background */
 	char ***seq;	/* See comment below */
 };
 

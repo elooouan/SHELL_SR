@@ -187,6 +187,7 @@ struct cmdline *readcmd(void)
 	s->in = 0;
 	s->out = 0;
 	s->seq = 0;
+	s->background = 0;
 
 	i = 0;
 	while ((w = words[i++]) != 0) {
@@ -230,16 +231,19 @@ struct cmdline *readcmd(void)
 			cmd[0] = 0;
 			cmd_len = 0;
 			break;
+		case '&':
+			if (words[i]) {
+				s->err = "parse error near '&', control operator must be at the end of the command";
+				goto error;
+			}
+			s->background = 1;
+			break;
 		default:
 			cmd = xrealloc(cmd, (cmd_len + 2) * sizeof(char *));
 			cmd[cmd_len++] = w;
 			cmd[cmd_len] = 0;
 		}
 	}
-
-	/* Adding & parsing for background handling */
-	/* gedit & cat res.txt -> opens gedit and then runs cat res.txt -> need to think about this */
-
 
 	if (cmd_len != 0) {
 		seq = xrealloc(seq, (seq_len + 2) * sizeof(char **));
@@ -261,6 +265,7 @@ error:
 		case '<':
 		case '>':
 		case '|':
+		case '&':
 			break;
 		default:
 			free(w);
