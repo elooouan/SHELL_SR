@@ -32,7 +32,7 @@ int main()
 		}
 
 		/* If "quit" command then terminate shell */
-		if (command_to_code(l->seq[0][0])) execute_command(l, 0);
+		if (l->seq[0] && command_to_code(l->seq[0][0])) execute_command(l, 0);
 
 		/* Execution  */
 		sequence_handler(l);

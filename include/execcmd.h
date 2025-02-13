@@ -42,6 +42,12 @@ int count_commands(struct cmdline* cmd);
 /* Creates n pipes for inter-process communication */
 void create_pipes(int pipes[][2], int number_cmds);
 
+/* Closes n-1 pipes */
+void close_pipes(int pipes[][2], int number_cmds);
+
+/* Wait for n child processes to die */
+void wait_all(int number_cmds);
+
 /* Handles execution of multiple commands in a pipeline */
 void pipeline_handler(struct cmdline* cmd, int number_cmds);
 

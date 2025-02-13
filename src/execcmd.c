@@ -84,17 +84,37 @@ void execute_command(struct cmdline *cmd, int i)
 int count_commands(struct cmdline* cmd)
 {
 	int number_cmds = 0;
+	
 	while (cmd->seq[number_cmds]) number_cmds++;
+
 	return number_cmds;
 }
 
 /* Function to create n pipes */
-void create_pipes(int pipes[][2], int number_cmds) {
+void create_pipes(int pipes[][2], int number_cmds)
+{
 	for (int i = 0; i < number_cmds - 1; i++) { //  we need (number_cmds - 1) pipes
 		if (pipe(pipes[i]) == -1) {
 			perror("pipes");
 			return;
 		}
+	}
+}
+
+/* Function to close all n-1 pipes */
+void close_pipes(int pipes[][2], int number_cmds)
+{
+	for (int i = 0; i < number_cmds - 1; i++) {
+		Close(pipes[i][0]);
+		Close(pipes[i][1]);
+	}
+}
+
+/* Function to wait for all child processes to die */
+void wait_all(int number_cmds)
+{
+	for (int i = 0; i < number_cmds; i++) {
+		Wait(NULL);
 	}
 }
 
@@ -110,38 +130,29 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds)
 
 		/* Child */
 		if (pid == 0) {
-			if (i > 0) Dup2(pipes[i-1][0], 0); //  If it's not the first command -> read from the pipeline
-			if (i < number_cmds - 1) Dup2(pipes[i][1], 1); // If it's not the last command -> write into the pipeline
+			/* If it's not the first command -> read from the pipeline */
+			if (i > 0) Dup2(pipes[i-1][0], 0);
 
-			for (int j = 0; j < number_cmds - 1; j++) {
-				Close(pipes[j][0]);
-				Close(pipes[j][1]);
-			}
+			/* If it's not the last command -> write into the pipeline */
+			if (i < number_cmds - 1) Dup2(pipes[i][1], 1);
 
+			close_pipes(pipes, number_cmds);
 			execute_command(cmd, i);
 		}
 	}
 
-	for (int j = 0; j < number_cmds - 1; j++) {
-		Close(pipes[j][0]);
-		Close(pipes[j][1]);
-	}
-
-	for (int i = 0; i < number_cmds; i++) {
-		Wait(NULL);
-	}
+	close_pipes(pipes, number_cmds);
+	wait_all(number_cmds);
 }
 
 /* Function to handle piping -> multiple commands */
 void sequence_handler(struct cmdline* cmd)
 {
 	int number_cmds = count_commands(cmd);
-	
-	/* If there are no pipes (single command) */
+
+	/* No command (Enter) */
 	if (!number_cmds) return;
-	else if(number_cmds > 1) {
-		pipeline_handler(cmd, number_cmds);
-	} else {
+	else if(number_cmds == 1) { /* Single command */
 		pid_t pid = Fork();
 
 		if (pid == 0) {
@@ -149,5 +160,7 @@ void sequence_handler(struct cmdline* cmd)
 		} else {
 			Wait(NULL);
 		}
+	} else { /* Pipes */
+		pipeline_handler(cmd, number_cmds);
 	}
 }
