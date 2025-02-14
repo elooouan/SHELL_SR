@@ -1,4 +1,5 @@
 #include "execcmd.h"
+#include "handlers.h" // TESTING
 
 /* Function to assign a code to a given command */
 int command_to_code(char* cmd) {
@@ -21,7 +22,7 @@ void built_in_command(struct cmdline *cmd, int i) {
 			exit(0);
 			break;
 		case 2:
-			if (!args[1] && cmd->background) printf("[job nb] : %d\n", getpid());
+			// if (!args[1] && cmd->background) printf("[job nb] : %d\n", getpid());
 			if (args[1]) {
 				if (chdir(args[1]) == -1) {
 					perror("cd");
@@ -34,29 +35,26 @@ void built_in_command(struct cmdline *cmd, int i) {
 }
 
 /* Function to handle external commands */
-void external_command(struct cmdline *cmd, int i){
+void external_command(struct cmdline *cmd, int i) {
 	char **args = cmd->seq[i];
-
-	if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
-	if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
 	
+	// if (cmd->background) fprintf(stderr,"\n[job nb] : %d\n", getpid());
 
 	if (execvp(args[0], args) == -1) {
-		printf("%s: command not found\n", args[0]);
+		printf("fclsh: command not found: %s\n", args[0]);
 		exit(1);
 	}	
-	if (cmd->background) printf("[job nb] : %d\n", getpid());
 }
 
 /* Function to handle input redirections for a command  */
 void input_redirection(char* in) {
-	int fd = open(in, O_RDONLY);
+	int fd = open(in, O_RDONLY, 0);
 
 	if (fd == -1) {
 		perror(in);
-		return;
+		exit(1); // return
 	} else {
-		Dup2(fd, 0);
+		Dup2(fd, STDIN_FILENO);
 		Close(fd);
 	}
 }
@@ -67,15 +65,15 @@ void output_redirection(char* out) {
 	
 	if (fd == -1) {
 		perror("open");
-		return;
+		exit(-1); // return
 	} else {
-		Dup2(fd, 1);
+		Dup2(fd, STDOUT_FILENO);
 		Close(fd);
 	}
 }
 
 /* Our main function to run commands */
-void execute_command(struct cmdline *cmd, int i, int background)
+void execute_command(struct cmdline *cmd, int i)
 {
 	char** words = cmd->seq[i];
 	
@@ -136,14 +134,22 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 
 		/* Child */
 		if (pid == 0) {
-			/* If it's not the first command -> read from the pipeline */
-			if (i > 0) Dup2(pipes[i-1][0], 0);
+			
+			if (i == 0 && cmd->in) {
+				input_redirection(cmd->in);
+			} else if (i > 0) {
+				Dup2(pipes[i-1][0], STDIN_FILENO); /* If it's not the first command -> read from the pipeline */
+			}
 
-			/* If it's not the last command -> write into the pipeline */
-			if (i < number_cmds - 1) Dup2(pipes[i][1], 1);
-
+			if (i == number_cmds - 1 && cmd->out) {
+				output_redirection(cmd->out);
+			} else if (i < number_cmds - 1) {
+				Dup2(pipes[i][1], STDOUT_FILENO); /* If it's not the last command -> write into the pipeline */
+			}
+			
 			close_pipes(pipes, number_cmds);
-			execute_command(cmd, i, background);
+			execute_command(cmd, i);
+			// execvp(cmd->seq[i][0], cmd->seq[i]);
 		}
 	}
 
@@ -157,13 +163,18 @@ void sequence_handler(struct cmdline* cmd)
 	int number_cmds = count_commands(cmd);
 	int background = cmd->background;
 	// printf("The process is in %s\n", background ? "Background" : "Foreground"); // -> remove just for debugging
+
+	Signal(SIGCHLD, handler_sigchild);
+
 	/* No command (Enter) */
 	if (!number_cmds) return;
-	else if(number_cmds == 1) { /* Single command */
+	else if (number_cmds == 1) { /* Single command */
 		pid_t pid = Fork();
 
 		if (pid == 0) {
-			execute_command(cmd, 0, background);
+			if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
+			if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
+			execute_command(cmd, 0);
 		} else {
 			if (!background) Wait(NULL);
 		}

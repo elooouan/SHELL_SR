@@ -23,7 +23,7 @@
 int command_to_code(char* cmd); /* Assigns a code to an internal command */
 void built_in_command(struct cmdline *cmd, int i); /* Handles built-in commands like cd and quit */
 void external_command(struct cmdline *cmd, int i); /* Executes an external command */
-void execute_command(struct cmdline *cmd, int i, int background); /* Executes a command */
+void execute_command(struct cmdline *cmd, int i); /* Executes a command */
 int count_commands(struct cmdline* cmd); /* Counts the number of commands in seq */
 
 /* Pipe handling */
