@@ -6,7 +6,7 @@
 typedef enum{
     STOPPED,
     RUNNING,
-    TERMINATED
+    DONE
 } State;
 
 typedef struct Processes {
@@ -15,8 +15,7 @@ typedef struct Processes {
 } Processes;
 
 typedef struct Jobs {
-    int id;
-    int background;
+    int id, nbJobs, background;
     Processes *process;
     State state;
     struct Jobs *next;    
