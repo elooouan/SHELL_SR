@@ -43,7 +43,7 @@ void external_command(struct cmdline *cmd, int i) {
 
 	if (execvp(args[0], args) == -1) {
 		printf("fclsh: command not found: %s\n", args[0]);
-		exit(1);
+		return;
 	}	
 }
 
