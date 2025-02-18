@@ -8,6 +8,7 @@ int command_to_code(char* cmd) {
 
 	if (strcmp(cmd, "quit") == 0) res = 1;
 	else if (strcmp(cmd, "cd") == 0) res = 2;
+	else if (strcmp(cmd, "kill") == 0) res = 3;
 	else res = 0;
 
 	return res;
@@ -127,7 +128,8 @@ void wait_all(int number_cmds, int background)
 void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 {
 	int pipes[number_cmds - 1][2]; // Array of n pipes -> ... | ... | ... 
-	pid_t pgid;
+
+	pid_t first_child_pid = -1;
 
 	create_pipes(pipes, number_cmds);
 
@@ -136,9 +138,12 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 
 		/* Child */
 		if (pid == 0) {
-			if (!i	) pgid = getpid();
-
-			setpgid(pid, pgid);
+			if(i == 0){ /* if first child -> set pgid as pid*/
+				Setpgid(0, 0);
+			}else{ /* set brothers pgid as first child pid*/
+				while (first_child_pid == -1);
+				Setpgid(0, first_child_pid);
+			}
 
 			if (i == 0 && cmd->in) {
 				input_redirection(cmd->in);
@@ -155,11 +160,13 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 			close_pipes(pipes, number_cmds);
 			execute_command(cmd, i);
 			// execvp(cmd->seq[i][0], cmd->seq[i]);
-		} else {
-			setpgid(pid, 0);	
+		}else{ /* Parent */
+			if(i == 0){ /* if first child -> save his pid*/
+				first_child_pid = pid;
+			}
 		}
 	}
-
+	
 	close_pipes(pipes, number_cmds);
 	wait_all(number_cmds, background);
 }
@@ -178,7 +185,8 @@ void sequence_handler(struct cmdline* cmd)
 	else if (number_cmds == 1) { /* Single command */
 		pid_t pid = Fork();
 
-		if (pid == 0) {
+		if (pid == 0) { /* Child */
+			Setpgid(0, 0);
 			if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
 			if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
 
