@@ -1,5 +1,6 @@
 #include "execcmd.h"
-#include "handlers.h" // TESTING
+#include "handlers.h"
+#include "jobs.h"
 
 /* Function to assign a code to a given command */
 int command_to_code(char* cmd) {
@@ -42,8 +43,8 @@ void external_command(struct cmdline *cmd, int i) {
 
 	if (execvp(args[0], args) == -1) {
 		printf("fclsh: command not found: %s\n", args[0]);
-		return;
-	}	
+		exit(1);
+	}
 }
 
 /* Function to handle input redirections for a command  */
@@ -126,6 +127,7 @@ void wait_all(int number_cmds, int background)
 void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 {
 	int pipes[number_cmds - 1][2]; // Array of n pipes -> ... | ... | ... 
+	pid_t pgid;
 
 	create_pipes(pipes, number_cmds);
 
@@ -134,7 +136,10 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 
 		/* Child */
 		if (pid == 0) {
-			
+			if (!i	) pgid = getpid();
+
+			setpgid(pid, pgid);
+
 			if (i == 0 && cmd->in) {
 				input_redirection(cmd->in);
 			} else if (i > 0) {
@@ -150,6 +155,8 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 			close_pipes(pipes, number_cmds);
 			execute_command(cmd, i);
 			// execvp(cmd->seq[i][0], cmd->seq[i]);
+		} else {
+			setpgid(pid, 0);	
 		}
 	}
 
@@ -174,8 +181,13 @@ void sequence_handler(struct cmdline* cmd)
 		if (pid == 0) {
 			if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
 			if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
+
+			setpgid(pid, 0);
 			execute_command(cmd, 0);
 		} else {
+			/* The Shell */
+			setpgid(pid, pid);
+
 			if (!background) Wait(NULL);
 		}
 	} else { /* Pipes */
