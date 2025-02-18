@@ -9,6 +9,7 @@ int command_to_code(char* cmd) {
 	if (strcmp(cmd, "quit") == 0) res = 1;
 	else if (strcmp(cmd, "cd") == 0) res = 2;
 	else if (strcmp(cmd, "kill") == 0) res = 3;
+	else if (strcmp(cmd, "jobs") == 0) res = 4;
 	else res = 0;
 
 	return res;
@@ -32,6 +33,12 @@ void built_in_command(struct cmdline *cmd, int i) {
 			} else {
 				fprintf(stderr, "cd: missing argument\n");
 			}
+			break;
+		case 3:
+			/* Need to fill */
+			break;
+		case 4:
+			print_jobs();
 			break;
 	}
 }
@@ -160,7 +167,7 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 			close_pipes(pipes, number_cmds);
 			execute_command(cmd, i);
 			execvp(cmd->seq[i][0], cmd->seq[i]);
-		}else{ /* Parent */
+		} else { /* Parent */
 			if (i == 0) { /* if first child -> save his pid*/
 				first_child_pid = pid;
 			}
@@ -206,8 +213,7 @@ void sequence_handler(struct cmdline* cmd)
 			} else {
 				/* The Shell */
 				if(background){
-					add_job(Getpgrp(), cmd);
-					print_jobs();
+					add_job(pid, cmd);
 				}
 				if (!background) Wait(NULL);
 			}

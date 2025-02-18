@@ -32,6 +32,7 @@ char* stateToString(State state);
 char* copy_cmdline(struct cmdline* cmd);
 
 void add_job(pid_t pgid, struct cmdline* cmd);
+void remove_job(pid_t pgid);
 void print_jobs();
 
 #endif
