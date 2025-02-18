@@ -14,7 +14,7 @@ LIBS+=-lpthread
 
 INCLDIR = -Iinclude
 INCLUDE = include/readcmd.h include/csapp.h
-OBJS = readcmd.o csapp.o execcmd.o handlers.o jobs.o
+OBJS = readcmd.o csapp.o execcmd.o handlers.o jobs.o foreground.o
 
 all: shell
 
