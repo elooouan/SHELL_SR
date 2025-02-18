@@ -134,7 +134,7 @@ unsigned int Alarm(unsigned int seconds) {
  
 void Setpgid(pid_t pid, pid_t pgid) {
     int rc;
-
+    // printf("pid: %d pgid: %d\n", pid, pgid);
     if ((rc = setpgid(pid, pgid)) < 0)
 	unix_error("Setpgid error");
     return;

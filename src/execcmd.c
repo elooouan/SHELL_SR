@@ -169,6 +169,11 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 	
 	close_pipes(pipes, number_cmds);
 	wait_all(number_cmds, background);
+
+	if (background) {
+		add_job(first_child_pid, cmd);
+		print_jobs();
+	}
 }
 
 /* Function to handle piping -> multiple commands */
@@ -183,7 +188,6 @@ void sequence_handler(struct cmdline* cmd)
 	/* No command (Enter) */
 	if (!number_cmds) return;
 	else if (number_cmds == 1) { /* Single command */
-		
 		if (command_to_code(cmd->seq[0][0]) > 0) {
 			if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
 			if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
@@ -194,14 +198,17 @@ void sequence_handler(struct cmdline* cmd)
 			
 			/* Child */
 			if (pid == 0) {
-				Setpgid(0, 0);
-				
+				Setpgid(0, 0); // man doesn't work
+
 				if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
 				if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
-
 				execute_command(cmd, 0);
 			} else {
 				/* The Shell */
+				if(background){
+					add_job(Getpgrp(), cmd);
+					print_jobs();
+				}
 				if (!background) Wait(NULL);
 			}
 		}
