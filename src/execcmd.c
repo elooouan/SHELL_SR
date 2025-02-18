@@ -10,6 +10,8 @@ int command_to_code(char* cmd) {
 	else if (strcmp(cmd, "cd") == 0) res = 2;
 	else if (strcmp(cmd, "kill") == 0) res = 3;
 	else if (strcmp(cmd, "jobs") == 0) res = 4;
+	else if (strcmp(cmd, "fg") == 0) res = 5;
+	else if (strcmp(cmd, "bg") == 0) res = 6;
 	else res = 0;
 
 	return res;
@@ -39,6 +41,14 @@ void built_in_command(struct cmdline *cmd, int i) {
 			break;
 		case 4:
 			print_jobs();
+			break;
+		case 5:
+			/* Handle fg */
+			fg_command(cmd);
+			break;
+		case 6:
+			/* handle bg */
+			bg_command(cmd);
 			break;
 	}
 }

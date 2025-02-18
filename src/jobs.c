@@ -87,3 +87,28 @@ void print_jobs()
     }
 }
 
+/* Function to return the default (latest) job */
+Jobs* get_default_job()
+{
+    return job_list;
+}
+
+/* Function to handle the fg command */
+void fg_command(struct cmdline* cmd)
+{
+    Jobs* job = get_default_job();
+    pid_t pgid = job->pgid;
+
+    kill(-pgid, SIGCONT);
+    cmd->background = 0;
+    remove_job(pgid);
+}
+
+/* Function to handle the bg command */
+void bg_command(struct cmdline* cmd)
+{
+    Jobs* job = get_default_job();
+    pid_t pgid = job->pgid;
+    kill(-pgid, SIGCONT);
+    cmd->background = 1;
+}

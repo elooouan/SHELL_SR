@@ -35,4 +35,7 @@ void add_job(pid_t pgid, struct cmdline* cmd);
 void remove_job(pid_t pgid);
 void print_jobs();
 
+void bg_command(struct cmdline* cmd);
+void fg_command(struct cmdline* cmd);
+
 #endif
