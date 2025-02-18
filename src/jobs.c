@@ -1,4 +1,5 @@
 #include "jobs.h"
+#include "foreground.h"
 
 int nbJobs = 0;
 
@@ -102,6 +103,9 @@ void fg_command(struct cmdline* cmd)
     kill(-pgid, SIGCONT);
     cmd->background = 0;
     remove_job(pgid);
+    add_foreground(pgid);
+    
+    while(foreground_list) sleep(1);
 }
 
 /* Function to handle the bg command */
@@ -111,4 +115,7 @@ void bg_command(struct cmdline* cmd)
     pid_t pgid = job->pgid;
     kill(-pgid, SIGCONT);
     cmd->background = 1;
+
+    add_job(pgid, cmd);
+    pop_foreground(pgid);
 }
