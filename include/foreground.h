@@ -11,17 +11,15 @@
 #include "execcmd.h"
 #include "csapp.h"
 
-extern int nbForeground;
 extern struct Foreground *foreground_list;
 
 typedef struct Foreground {
-    int id;
-    pid_t pgid;
-    struct cmdline* cmd;
-    State state;
+    pid_t pid;
     struct Foreground *next;    
 } Foreground;
 
-void add_foreground(pid_t pgid, struct cmdline* cmd);
+void add_foreground(pid_t pid);
+
+void pop_foreground(pid_t pid);
 
 #endif

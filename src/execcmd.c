@@ -1,6 +1,7 @@
 #include "execcmd.h"
 #include "handlers.h"
 #include "jobs.h"
+#include "foreground.h"
 
 /* Function to assign a code to a given command */
 int command_to_code(char* cmd) {
@@ -181,6 +182,7 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 			if (i == 0) { /* if first child -> save his pid*/
 				first_child_pid = pid;
 			}
+			add_foreground(pid);
 		}
 	}
 	
@@ -190,6 +192,8 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 	if (background) {
 		add_job(first_child_pid, cmd);
 		print_jobs();
+	}else{
+		while(foreground_list) sleep (1);
 	}
 }
 
@@ -224,8 +228,10 @@ void sequence_handler(struct cmdline* cmd)
 				/* The Shell */
 				if(background){
 					add_job(pid, cmd);
+				}else{
+					add_foreground(pid);
+					while(foreground_list) sleep(1);
 				}
-				if (!background) Wait(NULL);
 			}
 		}
 	} else { /* Pipes */
