@@ -183,17 +183,27 @@ void sequence_handler(struct cmdline* cmd)
 	/* No command (Enter) */
 	if (!number_cmds) return;
 	else if (number_cmds == 1) { /* Single command */
-		pid_t pid = Fork();
-
-		if (pid == 0) { /* Child */
-
+		
+		if (command_to_code(cmd->seq[0][0]) > 0) {
 			if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
 			if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
 
 			execute_command(cmd, 0);
 		} else {
-			/* The Shell */
-			if (!background) Wait(NULL);
+			pid_t pid = Fork();
+			
+			/* Child */
+			if (pid == 0) {
+				Setpgid(0, 0);
+				
+				if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
+				if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
+
+				execute_command(cmd, 0);
+			} else {
+				/* The Shell */
+				if (!background) Wait(NULL);
+			}
 		}
 	} else { /* Pipes */
 		pipeline_handler(cmd, number_cmds, background);
