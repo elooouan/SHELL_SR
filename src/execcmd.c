@@ -41,7 +41,7 @@ void external_command(struct cmdline *cmd, int i) {
 	char **args = cmd->seq[i];
 	
 	// if (cmd->background) fprintf(stderr,"\n[job nb] : %d\n", getpid());
-
+	//Setpgid(0, 0);
 	if (execvp(args[0], args) == -1) {
 		printf("fclsh: command not found: %s\n", args[0]);
 		exit(1);
@@ -186,16 +186,13 @@ void sequence_handler(struct cmdline* cmd)
 		pid_t pid = Fork();
 
 		if (pid == 0) { /* Child */
-			Setpgid(0, 0);
+
 			if (cmd->in) input_redirection(cmd->in); /* If not null : name of file for input redirection. */
 			if (cmd->out) output_redirection(cmd->out); /* If not null : name of file for output redirection. */
 
-			setpgid(pid, 0);
 			execute_command(cmd, 0);
 		} else {
 			/* The Shell */
-			setpgid(pid, pid);
-
 			if (!background) Wait(NULL);
 		}
 	} else { /* Pipes */
