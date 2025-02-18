@@ -13,7 +13,7 @@ typedef struct Processes {
     pid_t pid;
     struct Processes *next;
 } Processes;
-
+                                                   
 typedef struct Jobs {
     int id, nbJobs, background;
     Processes *process;
