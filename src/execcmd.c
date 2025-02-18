@@ -119,7 +119,7 @@ void wait_all(int number_cmds, int background)
 {
 	if (!background) {		
 		for (int i = 0; i < number_cmds; i++) {
-			Wait(NULL);
+			wait(NULL); /* if error do nothing -> child process completed succesfully faster than shell */
 		}
 	}
 }
@@ -129,7 +129,7 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 {
 	int pipes[number_cmds - 1][2]; // Array of n pipes -> ... | ... | ... 
 
-	pid_t first_child_pid = -1;
+	pid_t first_child_pid = 0;
 
 	create_pipes(pipes, number_cmds);
 
@@ -141,7 +141,7 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 			if(i == 0){ /* if first child -> set pgid as pid*/
 				Setpgid(0, 0);
 			}else{ /* set brothers pgid as first child pid*/
-				while (first_child_pid == -1);
+				while (first_child_pid == 0);
 				Setpgid(0, first_child_pid);
 			}
 
@@ -159,9 +159,9 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 			
 			close_pipes(pipes, number_cmds);
 			execute_command(cmd, i);
-			// execvp(cmd->seq[i][0], cmd->seq[i]);
+			execvp(cmd->seq[i][0], cmd->seq[i]);
 		}else{ /* Parent */
-			if(i == 0){ /* if first child -> save his pid*/
+			if (i == 0) { /* if first child -> save his pid*/
 				first_child_pid = pid;
 			}
 		}
