@@ -6,5 +6,6 @@
 /* Handler for the SIGCHLD signal */
 void handler_sigchild(int sig);
 void handler_sigint(int sig);
+void handler_sigtstp(int sig);
 
 #endif

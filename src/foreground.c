@@ -1,12 +1,15 @@
 #include "foreground.h"
+#include "jobs.h"
 
 Foreground *foreground_list = NULL;
 
-void add_foreground(pid_t pid, pid_t pgid){
+void add_foreground(pid_t pid, pid_t pgid, char* cmd)
+{
     Foreground *new_foreground = malloc(sizeof(Foreground));
 
     new_foreground->pid = pid;
     new_foreground->pgid = pgid;
+    new_foreground->cmd = cmd;
     new_foreground->next = foreground_list;
     foreground_list = new_foreground;
 }

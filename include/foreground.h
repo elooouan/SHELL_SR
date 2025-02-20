@@ -15,10 +15,11 @@ extern struct Foreground *foreground_list;
 
 typedef struct Foreground {
     pid_t pid, pgid;
+    char* cmd;
     struct Foreground *next;    
 } Foreground;
 
-void add_foreground(pid_t pid, pid_t pgid);
+void add_foreground(pid_t pid, pid_t pgid, char* cmd);
 void pop_foreground(pid_t pid);
 void free_foreground ();
 

@@ -182,15 +182,16 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 			if (i == 0) { /* if first child -> save his pid*/
 				first_child_pid = pid;
 			}
-			add_foreground(pid, first_child_pid);
+			char* command = copy_cmdline(cmd);
+			add_foreground(pid, first_child_pid, command);
 		}
 	}
 	
 	close_pipes(pipes, number_cmds);
-	wait_all(number_cmds, background);
 
 	if (background) {
-		add_job(first_child_pid, cmd);
+		char* command = copy_cmdline(cmd);
+		add_job(first_child_pid, command);
 		print_jobs();
 	}else{
 		while(foreground_list) sleep (1);
@@ -225,9 +226,11 @@ void sequence_handler(struct cmdline* cmd)
 			} else {
 				/* The Shell */
 				if(background){
-					add_job(pid, cmd);
+					char* command = copy_cmdline(cmd);
+					add_job(pid, command);
 				}else{
-					add_foreground(pid, pid);
+					char* command = copy_cmdline(cmd);
+					add_foreground(pid, pid, command);
 					while(foreground_list) sleep(1);
 				}
 			}

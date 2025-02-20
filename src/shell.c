@@ -14,6 +14,7 @@ int main()
 	/* Signal Handling */
 	Signal(SIGCHLD, handler_sigchild);
 	Signal(SIGINT, handler_sigint);
+	Signal(SIGTSTP, handler_sigtstp);
 
 	printf( "⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣴⣾⣗⣷⢶⣾⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣾⣿⣷⣶⣄⠀⠀⠀⠀⠀⠀⠀⠀\n"
 			"⠀⠀⠀⠀⠀⢀⣤⣶⠾⠻⠛⠦⠀⢙⠿⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⠋⠘⠦⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡆⠙⢄⠀⠀⠀⢠⠿⢾⣿⠳⢤⡀⠀⠀\n"
@@ -38,7 +39,6 @@ int main()
 
 	while (1) {
 		struct cmdline *l;
-
 
 		/* Analysis */
 		printf("ᓚᘏᗢ ");

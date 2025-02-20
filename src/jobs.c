@@ -34,13 +34,13 @@ char* copy_cmdline(struct cmdline* cmd) {
 }
 
 /* Function to add job to joblist */
-void add_job(pid_t pgid, struct cmdline* cmd)
+void add_job(pid_t pgid, char* cmd)
 {
     Jobs *new_job = malloc(sizeof(Jobs));
 
     new_job->id = ++nbJobs; // need to double check
     new_job->pgid = pgid;
-    new_job->cmd = copy_cmdline(cmd);
+    new_job->cmd = cmd;
     new_job->state = RUNNING;
     new_job->next = job_list;
 
@@ -87,7 +87,8 @@ void print_jobs()
         job_temp = job_temp->next;
     }
 }
-
+ 
+ /* Function to print jobs that are in the 'Done* state */
 void print_done_job(pid_t pid)
 {
     Jobs* job_temp = job_list, *current = job_list;
@@ -113,10 +114,13 @@ void fg_command(struct cmdline* cmd)
     Jobs* job = get_default_job();
     pid_t pgid = job->pgid;
 
+
+    job->state = RUNNING;
     kill(-pgid, SIGCONT);
-    cmd->background = 0;
+    cmd->background = 0; 
+
+    add_foreground(pgid, pgid, job->cmd);
     remove_job(pgid);
-    add_foreground(pgid, pgid);
     
     while(foreground_list) sleep(1);
 }
@@ -128,7 +132,6 @@ void bg_command(struct cmdline* cmd)
     pid_t pgid = job->pgid;
     kill(-pgid, SIGCONT);
     cmd->background = 1;
-
-    add_job(pgid, cmd);
+    job_list->state = RUNNING;
     pop_foreground(pgid);
 }
