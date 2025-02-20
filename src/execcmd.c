@@ -182,7 +182,7 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 			if (i == 0) { /* if first child -> save his pid*/
 				first_child_pid = pid;
 			}
-			add_foreground(pid);
+			add_foreground(pid, first_child_pid);
 		}
 	}
 	
@@ -203,8 +203,6 @@ void sequence_handler(struct cmdline* cmd)
 	int number_cmds = count_commands(cmd);
 	int background = cmd->background;
 	// printf("The process is in %s\n", background ? "Background" : "Foreground"); // -> remove just for debugging
-
-	Signal(SIGCHLD, handler_sigchild);
 
 	/* No command (Enter) */
 	if (!number_cmds) return;
@@ -229,7 +227,7 @@ void sequence_handler(struct cmdline* cmd)
 				if(background){
 					add_job(pid, cmd);
 				}else{
-					add_foreground(pid);
+					add_foreground(pid, pid);
 					while(foreground_list) sleep(1);
 				}
 			}

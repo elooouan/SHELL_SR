@@ -6,6 +6,7 @@ void handler_sigchild(int sig)
 {
     pid_t pid;
     while ((pid = waitpid(-1, NULL, WNOHANG)) > 0) {
+        print_done_job(pid);
         remove_job(pid);
         pop_foreground(pid);
     }
@@ -13,5 +14,20 @@ void handler_sigchild(int sig)
     	unix_error("waitpid error");
     }
     return;
+}
+
+void handler_sigint(int sig)
+{
+    if (!foreground_list) return;
+    
+    Foreground* fg = get_foreground_head();
+    Kill(-(fg->pgid), SIGTERM);
+    free_foreground();
+
+}
+
+void handler_sigtstp(int sig)
+{
+
 }
 

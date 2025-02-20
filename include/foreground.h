@@ -14,12 +14,14 @@
 extern struct Foreground *foreground_list;
 
 typedef struct Foreground {
-    pid_t pid;
+    pid_t pid, pgid;
     struct Foreground *next;    
 } Foreground;
 
-void add_foreground(pid_t pid);
-
+void add_foreground(pid_t pid, pid_t pgid);
 void pop_foreground(pid_t pid);
+void free_foreground ();
+
+Foreground* get_foreground_head();
 
 #endif

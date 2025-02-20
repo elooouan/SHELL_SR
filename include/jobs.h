@@ -34,6 +34,7 @@ char* copy_cmdline(struct cmdline* cmd);
 void add_job(pid_t pgid, struct cmdline* cmd);
 void remove_job(pid_t pgid);
 void print_jobs();
+void print_done_job(pid_t pid);
 
 void bg_command(struct cmdline* cmd);
 void fg_command(struct cmdline* cmd);

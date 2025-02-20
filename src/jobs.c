@@ -83,8 +83,21 @@ void print_jobs()
     Jobs *job_temp = job_list;
 
     while (job_temp) { 
-        printf("[%d] %s %s %s\n", job_temp->id, job_temp->id == nbJobs ? "+" : "-", stateToString(job_temp->state), job_temp->cmd);
+        printf("[%d] %s %s %s\n", job_temp->id, job_temp->id == nbJobs ? "+" : (job_temp->id == nbJobs - 1 ? "-" : " "), stateToString(job_temp->state), job_temp->cmd);
         job_temp = job_temp->next;
+    }
+}
+
+void print_done_job(pid_t pid)
+{
+    Jobs* job_temp = job_list, *current = job_list;
+
+    while(current != NULL && current->pgid != pid){
+        current = current->next;
+    }
+
+    if(current){
+        printf("[%d] %s %s %s\n", job_temp->id, job_temp->id == nbJobs ? "+" : (job_temp->id == nbJobs - 1 ? "-" : " "), stateToString(DONE), job_temp->cmd);
     }
 }
 
@@ -103,7 +116,7 @@ void fg_command(struct cmdline* cmd)
     kill(-pgid, SIGCONT);
     cmd->background = 0;
     remove_job(pgid);
-    add_foreground(pgid);
+    add_foreground(pgid, pgid);
     
     while(foreground_list) sleep(1);
 }
