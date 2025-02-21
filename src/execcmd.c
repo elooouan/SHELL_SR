@@ -3,7 +3,7 @@
 #include "jobs.h"
 #include "foreground.h"
 
-/* Function to assign a code to a given command */
+/* Assign a code to a given command */
 int command_to_code(char* cmd) {
 	int res;
 
@@ -28,7 +28,6 @@ void built_in_command(struct cmdline *cmd, int i) {
 			exit(0);
 			break;
 		case 2:
-			// if (!args[1] && cmd->background) printf("[job nb] : %d\n", getpid());
 			if (args[1]) {
 				if (chdir(args[1]) == -1) {
 					perror("cd");
@@ -38,18 +37,38 @@ void built_in_command(struct cmdline *cmd, int i) {
 			}
 			break;
 		case 3:
-			/* Need to fill */
+			if (!args[1] || !args[2]) {
+				printf("kill : not enough arguments\n");
+				break;
+			}
+			int pid = atoi(args[1]++);
+			int sig = atoi(++args[2]);
+			args[1]--;
+			args[2]--;
+			/* If user enter kill -pid -sig with "-" before pid -> sends sig to gpid of id pid */
+			if (args[1][0] == '-') {
+				printf("%d %d\n", pid, sig);
+				/* Need to make sure sig is between 1 and 31 and that the pid is < to the shell id */
+				if (pid == 0 || sig < 1 || sig > 31 || kill(pid, sig) == -1) printf("kill: error\n");
+			} else {
+				pid = atoi(args[1]);
+				if (pid == 0 || sig > 31 || sig < 1 || kill(pid, sig) == -1) printf("kill: error \n");
+			}
 			break;
 		case 4:
 			print_jobs();
 			break;
 		case 5:
 			/* Handle fg */
-			fg_command(cmd);
+			if (!args[1]) fg_command(cmd, nbJobs); /* -> if no argument is passed we take the default job (latest) */
+			else if(args[1] && args[1][0] == '%') fg_command(cmd, args[1][1] - '0'); /* fg %id */
+			else printf("fg: enter \'%%\' before the job id\n");
 			break;
 		case 6:
-			/* handle bg */
-			bg_command(cmd);
+			/* Handle bg */
+			if (!args[1]) bg_command(cmd, nbJobs); /* -> if no argument is passed we take the default job (latest) */
+			else if(args[1] && args[1][0] == '%') bg_command(cmd, args[1][1] - '0'); /* fg %id */
+			else printf("bg: enter \'%%\' before the job id\n");
 			break;
 	}
 }
@@ -57,9 +76,7 @@ void built_in_command(struct cmdline *cmd, int i) {
 /* Function to handle external commands */
 void external_command(struct cmdline *cmd, int i) {
 	char **args = cmd->seq[i];
-	
-	// if (cmd->background) fprintf(stderr,"\n[job nb] : %d\n", getpid());
-	//Setpgid(0, 0);
+
 	if (execvp(args[0], args) == -1) {
 		printf("fclsh: command not found: %s\n", args[0]);
 		exit(1);
@@ -132,16 +149,6 @@ void close_pipes(int pipes[][2], int number_cmds)
 	}
 }
 
-/* Function to wait for all child processes if in foreground*/
-void wait_all(int number_cmds, int background)
-{
-	if (!background) {		
-		for (int i = 0; i < number_cmds; i++) {
-			wait(NULL); /* if error do nothing -> child process completed succesfully faster than shell */
-		}
-	}
-}
-
 /* Function to handle and connect multiple pipes i.e. a pipeline */
 void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 {
@@ -156,10 +163,12 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 
 		/* Child */
 		if (pid == 0) {
-			if(i == 0){ /* if first child -> set pgid as pid*/
+			if (i == 0) { 
+				/* if first child -> set pgid as pid*/
 				Setpgid(0, 0);
-			}else{ /* set brothers pgid as first child pid*/
-				while (first_child_pid == 0);
+			} else {
+				/* set brothers pgid as first child pid*/
+				// while (first_child_pid == 0);
 				Setpgid(0, first_child_pid);
 			}
 
@@ -177,8 +186,9 @@ void pipeline_handler(struct cmdline* cmd, int number_cmds, int background)
 			
 			close_pipes(pipes, number_cmds);
 			execute_command(cmd, i);
-			execvp(cmd->seq[i][0], cmd->seq[i]);
-		} else { /* Parent */
+		}
+		/* Parent */
+		else {
 			if (i == 0) { /* if first child -> save his pid*/
 				first_child_pid = pid;
 			}
@@ -203,7 +213,6 @@ void sequence_handler(struct cmdline* cmd)
 {
 	int number_cmds = count_commands(cmd);
 	int background = cmd->background;
-	// printf("The process is in %s\n", background ? "Background" : "Foreground"); // -> remove just for debugging
 
 	/* No command (Enter) */
 	if (!number_cmds) return;

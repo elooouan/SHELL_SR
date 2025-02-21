@@ -107,13 +107,13 @@ Jobs* get_default_job();
  *
  * @param cmd The command line structure.
  */
-void fg_command(struct cmdline* cmd);
+void fg_command(struct cmdline* cmd, int id);
 
 /**
  * @brief Handles the 'bg' command to send a job to the background.
  *
  * @param cmd The command line structure.
  */
-void bg_command(struct cmdline* cmd);
+void bg_command(struct cmdline* cmd, int id);
 
 #endif

@@ -91,15 +91,17 @@ void print_jobs()
  /* Function to print jobs that are in the 'Done* state */
 void print_done_job(pid_t pid)
 {
-    Jobs* job_temp = job_list, *current = job_list;
+    Jobs* current = job_list;
 
     while(current != NULL && current->pgid != pid){
         current = current->next;
     }
 
     if(current){
-        printf("[%d] %s %s %s\n", job_temp->id, job_temp->id == nbJobs ? "+" : (job_temp->id == nbJobs - 1 ? "-" : " "), stateToString(DONE), job_temp->cmd);
+        printf("[%d] %s %s %s", current->id, current->id == nbJobs ? "+" : (current->id == nbJobs - 1 ? "-" : " "), stateToString(DONE), current->cmd);
+        return;
     }
+
 }
 
 /* Function to return the default (latest) job */
@@ -108,15 +110,35 @@ Jobs* get_default_job()
     return job_list;
 }
 
-/* Function to handle the fg command */
-void fg_command(struct cmdline* cmd)
+/* Find a job with a given id */
+Jobs* find_job(int id)
 {
-    Jobs* job = get_default_job();
+    Jobs* current = job_list;
+    
+    while (current->id != id) {
+        current = current->next;
+    }
+
+    return current;
+}
+
+/* Handling of the fg command */
+void fg_command(struct cmdline* cmd, int id)
+{
+    /* Error handling from ASCII to int */
+    if (!job_list) {
+        printf("fg: no current job\n"); 
+        return;
+    } else if (id > nbJobs || id < 1) {
+        printf("fg: invalid id, please enter a valid job id\n");
+        return;
+    }
+
+    Jobs* job = find_job(id);
     pid_t pgid = job->pgid;
 
-
-    job->state = RUNNING;
     kill(-pgid, SIGCONT);
+    job->state = RUNNING;
     cmd->background = 0; 
 
     add_foreground(pgid, pgid, job->cmd);
@@ -125,13 +147,24 @@ void fg_command(struct cmdline* cmd)
     while(foreground_list) sleep(1);
 }
 
-/* Function to handle the bg command */
-void bg_command(struct cmdline* cmd)
-{
-    Jobs* job = get_default_job();
+/* Handling of the bg command */
+void bg_command(struct cmdline* cmd, int id)
+{   
+    /* Error handling from ASCII to int */
+    if (!job_list) {
+        printf("bg: no current job\n"); 
+        return;
+    } else if (id > nbJobs || id < 1) {
+        printf("bg: invalid id, please enter a valid job id\n");
+        return;
+    }
+
+    Jobs* job = find_job(id);
     pid_t pgid = job->pgid;
+
     kill(-pgid, SIGCONT);
     cmd->background = 1;
     job_list->state = RUNNING;
+
     pop_foreground(pgid);
 }

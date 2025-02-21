@@ -57,30 +57,10 @@ int main()
 			continue;
 		}
 
-		/* If command is "quit" then terminate shell */
-		if (l->seq[0] && command_to_code(l->seq[0][0]) == 1) execute_command(l, 0); /* WARNING: cannot use "quit" inside of a pipe -> if you want to do so add "quit" inside of execcmd and use kill(ppid (shell pid), SIGKILL)*/
-
-		// more bugs are -> gedit & and then gedit, cd tests & then multiple quits
-		// gedit & and then jbasjabsdlsad
-		// cat res.txt | sort > res.txt
+		/* If entered command is "quit" then terminate shell */
+		if (l->seq[0] && command_to_code(l->seq[0][0]) == 1) execute_command(l, 0);
 
 		/* Execution  */
 		sequence_handler(l);
-
-		/* DEBUGGING */
-		/* Display each command of the pipe */
-		// int i, j;
-
-		// if (l->in) printf("in: %s\n", l->in);
-		// if (l->out) printf("out: %s\n", l->out);
-
-		// for (i=0; l->seq[i]!=0; i++) {
-		// 	char **cmd = l->seq[i];
-		// 	printf("seq[%d]: ", i);
-		// 	for (j=0; cmd[j]!=0; j++) {
-		// 		printf("%s ", cmd[j]);
-		// 	}
-		// 	printf("\n");
-		// }
 	}
 }
