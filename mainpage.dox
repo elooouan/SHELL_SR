@@ -1,0 +1,36 @@
+/**
+ * @mainpage Simple Shell Implementation
+ *
+ * @section intro_sec Introduction
+ *
+ * Welcome to the documentation for the Simple Shell implementation in C. This shell supports built-in commands, job control, pipes, input/output redirection, and background/foreground execution. The goal of this project is to provide a basic yet functional shell environment for educational purposes.
+ *
+ * @section features_sec Features
+ *
+ * - **Built-in Commands**: Supports common built-in commands such as `cd`, `exit`, `jobs`, `fg`, and `bg`.
+ * - **Job Control**: Manage foreground and background jobs, including stopping, continuing, and listing jobs.
+ * - **Pipes**: Support for piping the output of one command to the input of another.
+ * - **Input/Output Redirection**: Redirect standard input and output to files.
+ * - **Background/Foreground Execution**: Run commands in the background or foreground.
+ *
+ * @section usage_sec Usage
+ *
+ * To use the Simple Shell, compile the source files and run the executable. The shell will prompt you to enter commands, which it will then execute. You can use built-in commands, manage jobs, and utilize pipes and redirection as needed.
+ *
+ * @section example_sec Example
+ *
+ * Here is a simple example of how to use the shell:
+ *
+ * @code
+ * $ ./shell
+ * shell> ls -l | grep txt
+ * shell> echo "Hello, World!" > output.txt
+ * shell> cat output.txt
+ * shell> jobs
+ * shell> fg 1
+ * shell> bg 2
+ * shell> exit
+ * $
+ * @endcode
+ *
+ */

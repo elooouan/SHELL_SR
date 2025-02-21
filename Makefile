@@ -18,12 +18,18 @@ OBJS = readcmd.o csapp.o execcmd.o handlers.o jobs.o foreground.o
 
 all: shell
 
+docs:
+	doxygen Doxyfile
+
 %.o: %.c $(INCLUDE)
 	$(CC) $(CFLAGS) $(INCLDIR) -c -o $@ $<
 
 %: %.o $(OBJS)
 	$(CC) -o $@ $(LDFLAGS) $^ $(LIBS)
 
+
+
 clean:
 	rm -f shell *.o
+	rm -rf doc
 
