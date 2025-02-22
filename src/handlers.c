@@ -1,6 +1,4 @@
 #include "handlers.h"
-#include "foreground.h"
-#include "jobs.h"
 
 /* Handler for the SIGCHILD signal */
 void handler_sigchild(int sig)

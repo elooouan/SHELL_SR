@@ -1,5 +1,4 @@
 #include "foreground.h"
-#include "jobs.h"
 
 Foreground *foreground_list = NULL;
 
