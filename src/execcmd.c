@@ -46,7 +46,7 @@ void built_in_command(struct cmdline *cmd, int i) {
 			args[2]--;
 			/* If user enter kill -pid -sig with "-" before pid -> sends sig to gpid of id pid */
 			if (args[1][0] == '-') {
-				/* Need to make sure sig is between 1 and 31 and that the pid is < to the shell id */
+				/* error handling -> also need to make sure sig is between 1 and 31 */
 				if (pid == 0 || sig < 1 || sig > 31 || kill(pid, sig) == -1) fprintf(stderr, "kill: error\n");
 			} else {
 				pid = atoi(args[1]);
