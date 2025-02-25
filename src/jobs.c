@@ -1,5 +1,4 @@
 #include "jobs.h"
-#include "foreground.h"
 
 int nbJobs = 0;
 

@@ -1,0 +1,58 @@
+#
+# test05.txt - pipeline with redirections (considering dash piping)
+#
+
+echo "Running: display the contents of res.txt"
+cat res.txt
+echo
+
+sleep 0.1
+
+echo "Running: display sorted contents of res.txt using pipeline"
+cat res.txt | sort
+echo
+
+sleep 0.1
+
+echo "Running: display sorted contents of res.txt using input redirection and pipeline"
+cat < res.txt | sort
+echo
+
+sleep 0.1
+
+echo "Running: sort contents of res.txt using input redirection and pipeline, with output redirected to res2.txt"
+cat < res.txt | sort > res2.txt
+echo
+
+sleep 0.1
+
+echo "Running: display the contents of res2.txt"
+cat res2.txt
+echo
+
+sleep 0.1
+
+echo "Running: overwrite res2.txt with the text empty"
+echo empty > res2.txt
+echo
+
+sleep 0.1
+
+echo "Running: display the contents of res2.txt"
+cat res2.txt
+echo
+
+sleep 0.1
+
+echo "Running: sort contents of res.txt using pipeline and redirect output to res2.txt"
+cat res.txt | sort > res2.txt
+echo
+
+sleep 0.1
+
+echo "Running: display the contents of res2.txt"
+cat res2.txt
+echo
+
+sleep 0.1
+quit

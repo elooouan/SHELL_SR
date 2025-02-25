@@ -6,7 +6,8 @@
 #ifndef __JOBS_H
 #define __JOBS_H
 
-#include "execcmd.h"
+#include "readcmd.h"
+#include "foreground.h"
 
 /**
  * @brief Enumeration representing the state of a job.
@@ -61,10 +62,10 @@ extern Jobs* job_list;
 char* stateToString(State state);
 
 /**
- * @brief Deep copies the command line.
+ * @brief Copies the command line.
  *
  * @param cmd The command line structure to copy.
- * @return A deep copy of the command line string.
+ * @return A copy of the command line string.
  */
 char* copy_cmdline(struct cmdline* cmd);
 
@@ -103,16 +104,29 @@ void print_done_job(pid_t pid);
 Jobs* get_default_job();
 
 /**
- * @brief Handles the 'fg' command to bring a job to the foreground.
+ * @brief Bring a background / suspended job to the foreground.
  *
- * @param cmd The command line structure.
+ * This function resumes a job by sending a SIGCONT signal to the process group associated with
+ * the job. It updates the job's state to RUNNING, transfers it to the foreground, and waits until
+ * the foreground job has completed. If the job was already running in the background,
+ * it is transferred to the foreground.
+ * If there are no jobs or if the given job id is invalid, an error message is displayed.
+ *
+ * @param cmd Pointer to the command line structure.
+ * @param id The job identifier for the job to be transferred to the foreground.
  */
 void fg_command(struct cmdline* cmd, int id);
 
 /**
- * @brief Handles the 'bg' command to send a job to the background.
+ * @brief Resume a suspended job in the background.
  *
- * @param cmd The command line structure.
+ * This function resumes a job in the background by sending a SIGCONT signal to the process group
+ * associated with the job. It sets the job's state to RUNNING and ensures that it remains in the
+ * background. 
+ * If no jobs are available or if the given job id is invalid, an error message is displayed.
+ *
+ * @param cmd Pointer to the command line structure.
+ * @param id The job identifier for the job to be resumed in the background.
  */
 void bg_command(struct cmdline* cmd, int id);
 

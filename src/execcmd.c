@@ -1,7 +1,4 @@
 #include "execcmd.h"
-#include "handlers.h"
-#include "jobs.h"
-#include "foreground.h"
 
 /* Assign a code to a given command */
 int command_to_code(char* cmd) {

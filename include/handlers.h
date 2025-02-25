@@ -9,33 +9,38 @@
 #include "jobs.h"
 
 /**
- * @brief Handler for the SIGCHLD signal.
+ * @brief Signal handler for SIGCHLD.
  *
- * This function handles the SIGCHLD signal by waiting for child processes
- * to change state and then performing necessary cleanup operations.
+ * This function is invoked when a SIGCHLD signal is received, indicating that one or more child processes
+ * have changed state. It enters a loop to reap all terminated child processes.
+ * For each terminated child, it removes the job from the job and frees any associated foreground job resources.
+ * If waitpid() returns -1 and the error is not ECHILD (indicating no more children exist), it reports the error
+ * using unix_error().
  *
- * @param sig The signal number (SIGCHLD).
+ * @param sig The signal number (expected to be SIGCHLD).
  */
 void handler_sigchild(int sig);
 
 /**
- * @brief Handler for the SIGINT signal.
+ * @brief Signal handler for SIGINT.
  *
- * This function handles the SIGINT signal by sending a SIGINT signal to the
- * foreground process group and performing necessary cleanup operations.
+ * This function is invoked when a SIGINT signal is received. It first checks if there is an active
+ * foreground job. If one exists, it retrieves the head of the foreground job list, sends the SIGINT signal to the
+ * entire process group of the foreground job and frees the foreground job list.
  *
- * @param sig The signal number (SIGINT).
+ * @param sig The signal number (expected to be SIGINT).
  */
 void handler_sigint(int sig);
 
 /**
- * @brief Handler for the SIGTSTP signal.
+ * @brief Signal handler for SIGTSTP.
  *
- * This function handles the SIGTSTP signal by sending a SIGTSTP signal to the
- * foreground process group, adding the job to the job list, and performing
- * necessary cleanup operations.
+ * This function is invoked when a SIGTSTP signal is received. It checks if there is an active
+ * foreground job. If one exists, it retrieves the foreground job, sends the SIGTSTP
+ * signal to the entire process group, and adds the job to the job list as a stopped job. 
+ * The corresponding entry is removed from the foreground list.
  *
- * @param sig The signal number (SIGTSTP).
+ * @param sig The signal number (expected to be SIGTSTP).
  */
 void handler_sigtstp(int sig);
 

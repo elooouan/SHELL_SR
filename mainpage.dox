@@ -7,7 +7,7 @@
  *
  * @section features_sec Features
  *
- * - **Built-in Commands**: Supports common built-in commands such as `cd`, `exit`, `jobs`, `fg`, and `bg`.
+ * - **Built-in Commands**: Supports common built-in commands such as `cd`, `exit`, `kill`, `jobs`, `fg`, and `bg`.
  * - **Job Control**: Manage foreground and background jobs, including stopping, continuing, and listing jobs.
  * - **Pipes**: Support for piping the output of one command to the input of another.
  * - **Input/Output Redirection**: Redirect standard input and output to files.
@@ -23,13 +23,13 @@
  *
  * @code
  * $ ./shell
- * shell> ls -l | grep txt
- * shell> echo "Hello, World!" > output.txt
- * shell> cat output.txt
- * shell> jobs
- * shell> fg 1
- * shell> bg 2
- * shell> exit
+ * ᓚᘏᗢ ls -l | grep txt
+ * ᓚᘏᗢ echo "Hello, World!" > output.txt
+ * ᓚᘏᗢ cat output.txt
+ * ᓚᘏᗢ jobs
+ * ᓚᘏᗢ fg 1
+ * ᓚᘏᗢ bg 2
+ * ᓚᘏᗢ exit
  * $
  * @endcode
  *
