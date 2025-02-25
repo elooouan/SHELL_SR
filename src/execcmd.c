@@ -6,14 +6,16 @@
 /* Assign a code to a given command */
 int command_to_code(char* cmd) {
 	int res;
-
+	
+	 /* Built-in Commands > 0 */
 	if (strcmp(cmd, "quit") == 0) res = 1;
 	else if (strcmp(cmd, "cd") == 0) res = 2;
 	else if (strcmp(cmd, "kill") == 0) res = 3;
 	else if (strcmp(cmd, "jobs") == 0) res = 4;
 	else if (strcmp(cmd, "fg") == 0) res = 5;
 	else if (strcmp(cmd, "bg") == 0) res = 6;
-	else res = 0;
+
+	else res = 0; /* External Command */
 
 	return res;
 }
@@ -38,7 +40,7 @@ void built_in_command(struct cmdline *cmd, int i) {
 			break;
 		case 3:
 			if (!args[1] || !args[2]) {
-				printf("kill : not enough arguments\n");
+				fprintf(stderr, "kill : not enough arguments\n");
 				break;
 			}
 			int pid = atoi(args[1]++);
@@ -47,12 +49,11 @@ void built_in_command(struct cmdline *cmd, int i) {
 			args[2]--;
 			/* If user enter kill -pid -sig with "-" before pid -> sends sig to gpid of id pid */
 			if (args[1][0] == '-') {
-				printf("%d %d\n", pid, sig);
 				/* Need to make sure sig is between 1 and 31 and that the pid is < to the shell id */
-				if (pid == 0 || sig < 1 || sig > 31 || kill(pid, sig) == -1) printf("kill: error\n");
+				if (pid == 0 || sig < 1 || sig > 31 || kill(pid, sig) == -1) fprintf(stderr, "kill: error\n");
 			} else {
 				pid = atoi(args[1]);
-				if (pid == 0 || sig > 31 || sig < 1 || kill(pid, sig) == -1) printf("kill: error \n");
+				if (pid == 0 || sig > 31 || sig < 1 || kill(pid, sig) == -1) fprintf(stderr, "kill: error \n");
 			}
 			break;
 		case 4:
@@ -62,13 +63,13 @@ void built_in_command(struct cmdline *cmd, int i) {
 			/* Handle fg */
 			if (!args[1]) fg_command(cmd, nbJobs); /* -> if no argument is passed we take the default job (latest) */
 			else if(args[1] && args[1][0] == '%') fg_command(cmd, args[1][1] - '0'); /* fg %id */
-			else printf("fg: enter \'%%\' before the job id\n");
+			else fprintf(stderr, "fg: enter \'%%\' before the job id\n");
 			break;
 		case 6:
 			/* Handle bg */
 			if (!args[1]) bg_command(cmd, nbJobs); /* -> if no argument is passed we take the default job (latest) */
 			else if(args[1] && args[1][0] == '%') bg_command(cmd, args[1][1] - '0'); /* fg %id */
-			else printf("bg: enter \'%%\' before the job id\n");
+			else fprintf(stderr, "bg: enter \'%%\' before the job id\n");
 			break;
 	}
 }
@@ -78,7 +79,7 @@ void external_command(struct cmdline *cmd, int i) {
 	char **args = cmd->seq[i];
 
 	if (execvp(args[0], args) == -1) {
-		printf("fclsh: command not found: %s\n", args[0]);
+		fprintf(stderr, "ᓚᘏᗢ : command not found: %s\n", args[0]);
 		exit(1);
 	}
 }

@@ -98,7 +98,7 @@ void print_done_job(pid_t pid)
     }
 
     if(current){
-        printf("[%d] %s %s %s", current->id, current->id == nbJobs ? "+" : (current->id == nbJobs - 1 ? "-" : " "), stateToString(DONE), current->cmd);
+        fprintf(stderr, "[%d] %s %s %s\n", current->id, current->id == nbJobs ? "+" : (current->id == nbJobs - 1 ? "-" : " "), stateToString(DONE), current->cmd);
         return;
     }
 
@@ -127,10 +127,10 @@ void fg_command(struct cmdline* cmd, int id)
 {
     /* Error handling from ASCII to int */
     if (!job_list) {
-        printf("fg: no current job\n"); 
+        fprintf(stderr, "fg: no current job\n"); 
         return;
     } else if (id > nbJobs || id < 1) {
-        printf("fg: invalid id, please enter a valid job id\n");
+        fprintf(stderr, "fg: invalid id, please enter a valid job id\n");
         return;
     }
 
@@ -152,10 +152,10 @@ void bg_command(struct cmdline* cmd, int id)
 {   
     /* Error handling from ASCII to int */
     if (!job_list) {
-        printf("bg: no current job\n"); 
+        fprintf(stderr, "bg: no current job\n"); 
         return;
     } else if (id > nbJobs || id < 1) {
-        printf("bg: invalid id, please enter a valid job id\n");
+        fprintf(stderr, "bg: invalid id, please enter a valid job id\n");
         return;
     }
 
